@@ -1,3 +1,6 @@
+/**
+*
+*/
 const createNewGame = difficulty => {
     // 1. create main window
     const mainWindow = document.createElement('div');
@@ -28,9 +31,27 @@ const createNewGame = difficulty => {
     //amountMineShow.innerHTML = difficulty;
     //foundMineShow.innerHTML = '00';
 
-
+    // 4. create game board and append to main window
+    const gameBoard = createNewGameBoard(difficulty);
+    mainWindow.appendChild(gameBoard);
 
     return mainWindow;
+}
+
+const createNewGameBoard = difficulty => {
+    const widths = [0, 9, 16, 30]; // first data is dummy
+    const heights = [0, 9, 16, 16]; // first data is dummy
+    const mineCnts = [0, 10, 40, 99]; // first data is dummy
+
+    // 1. set variables of board's size and count of mine
+    const width = widths[difficulty];
+    const height = heights[difficulty];
+    const mineCnt = mineCnts[difficulty];
+
+    // 2. create game board
+    const gameBoardTable = document.createElement('table');
+    gameBoardTable.setAttribute('id', 'gameBoardTable');
+
 }
 
 window.onload = () => {
