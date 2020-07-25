@@ -52,6 +52,61 @@ const createNewGameBoard = difficulty => {
     const gameBoardTable = document.createElement('table');
     gameBoardTable.setAttribute('id', 'gameBoardTable');
 
+    // 2-1. create table header
+    const gameBoardTableHeader = document.createElement('thead');
+    gameBoardTableHeader.setAttribute('id', 'gameBoardTableHeader');
+    gameBoardTable.appendChild(gameBoardTableHeader);
+
+    // 2-2. create table body
+    const gameBoardTableBody = document.createElement('tbody');
+    gameBoardTableBody.setAttribute('id', 'gameBoardTableBody');
+    gameBoardTable.appendChild(gameBoardTableBody);
+
+    // 2-3. fill table body with cell
+    for(let h = 0; h < height; h++){
+        let gameBoardTableRow = document.createElement('tr');
+        gameBoardTableRow.setAttribute('id', `gameBoardTableRow${h}`);
+
+        for(let w = 0; w < width; w++){
+            let cell = document.createElement('td');
+            cell.setAttribute('id', `w${w}h${h}`);
+            cell.setAttribute('height', h);
+            cell.setAttribute('width', w);
+            
+            // add class - cell with classList
+            // cell.setAttribute('class', 'cell');
+            cell.classList.add('cell');
+
+            // fill with dummy data 
+            cell.innerHTML = `ㅁ`;
+
+            // add event listener
+            //cell.addEventListener('click', cellClickEventListener);
+
+            // add to row
+            gameBoardTableRow.appendChild(cell);
+        }
+
+        gameBoardTableBody.appendChild(gameBoardTableRow);
+    }
+    
+    // 3. Decide mine cell
+    for(let i = 0; i < mineCnt; i++){
+        // 1. w, h 하나 랜덤 선택 
+        let w, h, mineCell;
+
+        do {
+            w = Math.floor(Math.random() * width);
+            h = Math.floor(Math.random() * height);
+
+            mineCell = gameBoardTableBody.rows[h].cells[w];
+        } while(mineCell.classList.contains('mine'));
+
+        // 2. 
+        mineCell.classList.add('mine');
+    }
+
+    return gameBoardTable;
 }
 
 window.onload = () => {
