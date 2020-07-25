@@ -1,5 +1,5 @@
 /**
-*
+* 
 */
 const createNewGame = difficulty => {
     // 1. create main window
