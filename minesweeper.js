@@ -1,6 +1,7 @@
-/**
-* 
-*/
+const widths = [0, 9, 16, 30]; // first data is dummy
+const heights = [0, 9, 16, 16]; // first data is dummy
+const mineCnts = [0, 10, 40, 99]; // first data is dummy
+
 const createNewGame = difficulty => {
     // 1. create main window
     const mainWindow = document.createElement('div');
@@ -38,11 +39,7 @@ const createNewGame = difficulty => {
     return mainWindow;
 }
 
-const createNewGameBoard = difficulty => {
-    const widths = [0, 9, 16, 30]; // first data is dummy
-    const heights = [0, 9, 16, 16]; // first data is dummy
-    const mineCnts = [0, 10, 40, 99]; // first data is dummy
-
+const createNewGameBoard = difficulty => {    
     // 1. set variables of board's size and count of mine
     const width = widths[difficulty];
     const height = heights[difficulty];
@@ -81,7 +78,7 @@ const createNewGameBoard = difficulty => {
             cell.innerHTML = `ㅁ`;
 
             // add event listener
-            //cell.addEventListener('click', cellClickEventListener);
+            cell.addEventListener('click', cellClickEventListener);
 
             // add to row
             gameBoardTableRow.appendChild(cell);
@@ -92,7 +89,6 @@ const createNewGameBoard = difficulty => {
     
     // 3. Decide mine cell
     for(let i = 0; i < mineCnt; i++){
-        // 1. w, h 하나 랜덤 선택 
         let w, h, mineCell;
 
         do {
@@ -102,11 +98,92 @@ const createNewGameBoard = difficulty => {
             mineCell = gameBoardTableBody.rows[h].cells[w];
         } while(mineCell.classList.contains('mine'));
 
-        // 2. 
         mineCell.classList.add('mine');
     }
 
     return gameBoardTable;
+}
+
+/**
+ * cell's click event listener
+ * 
+ * 1. check this cell is mine.
+ *    If this cell is mine, game over
+ * 2. Count mine(n) that are around this cell
+ * 3. Add clikced_n class to this cell's classList
+ * 4-1. If n is larger than 0, changed this innerHTML
+ * 4-2. If n is 0, loop around this cell and if that cell have not click_0, click them.
+ */
+const cellClickEventListener = event => {
+    const cell = event.srcElement;
+    const isMine = cell.classList.contains('mine');
+
+    // 1. check this cell is mine
+    if(isMine) {
+        // game end
+        console.log('You lose');
+
+        return;
+    }
+
+    // 2. Count mine that are around this cell
+    const width = widths[difficulty.value];
+    const height = heights[difficulty.value];
+    
+    const cellX = Number(cell.width);
+    const cellY = Number(cell.height);
+
+    let aroundMineCnt = 0;
+
+    for(let h = cellY - 1; h <= (cellY + 1); h++){
+        // check is valid heigth
+        if(h < 0 || h > height - 1) 
+            continue;
+
+        for(let w = cellX - 1; w <= (cellX + 1); w++){
+            // check is valid width
+            if(w < 0 || w > width - 1)
+                continue;
+            let aroundCell = document.getElementById(`w${w}h${h}`);
+            if(aroundCell.classList.contains('mine'))
+                aroundMineCnt++;
+        } // end w-for
+
+    } // end h-for
+    
+
+    // 3. Add clikced_n class to this cell's classList
+    cell.classList.add(`clicked_${aroundMineCnt}`);
+
+    if(aroundMineCnt != 0) {
+        // 4-1. If n is larger than 0, changed this innerHTML
+        cell.innerHTML = aroundMineCnt;
+        return;
+    } else {
+        //  4-2. If n is 0, loop around this cell and if that cell have not click_0, click them.
+        cell.innerHTML = '0';
+        
+        for(let h = cellY - 1; h <= (cellY + 1); h++){
+            // check is valid heigth
+            if(h < 0 || h > height - 1) 
+                continue;
+    
+            for(let w = cellX - 1; w <= (cellX + 1); w++){
+                // check is valid width
+                if(w < 0 || w > width - 1)
+                    continue;
+
+                let aroundCell = document.getElementById(`w${w}h${h}`);
+
+                if(aroundCell.classList.contains(`clicked_0`))  
+                    continue;
+                
+                aroundCell.click();
+            } // end w-for
+        } // end h-for
+    }
+    
+
 }
 
 window.onload = () => {
