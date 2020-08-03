@@ -4,3 +4,41 @@ td.cell {
     height : 30px;
     text-align : center;
 }
+
+/* td.clicked_n start */
+td.clicked_0 {
+    opacity: 0.5;
+}
+
+td.clicked_1 {
+    color : blue;
+}
+
+td.clicked_2 {
+    color : green
+}
+
+td.clicked_3 {
+    color : red
+}
+
+td.clicked_4 {
+    color : violet;
+}
+
+td.clicked_5 {
+    color : brown;
+}
+
+td.clicked_6 {
+    color : crimson;
+}
+
+td.clicked_7 {
+    color : peru;
+}
+
+td.clicked_8 {
+    color : maroon;
+}
+/* td.clicked_n end */

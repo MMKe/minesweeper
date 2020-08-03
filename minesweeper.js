@@ -161,7 +161,7 @@ const cellClickEventListener = event => {
         return;
     } else {
         //  4-2. If n is 0, loop around this cell and if that cell have not click_0, click them.
-        cell.innerHTML = '0';
+        cell.innerHTML = '';
         
         for(let h = cellY - 1; h <= (cellY + 1); h++){
             // check is valid heigth
