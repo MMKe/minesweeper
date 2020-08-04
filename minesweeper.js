@@ -131,7 +131,7 @@ const cellClickEventListener = event => {
     if(isMine) {
         // game end
         console.log('You lose');
-
+        gameOver(cell);
         return;
     }
 
@@ -155,7 +155,6 @@ const cellClickEventListener = event => {
     if(aroundMineCnt != 0) {
         // 4-1. If n is larger than 0, changed this innerHTML
         cell.innerHTML = aroundMineCnt;
-        return;
     } else {
         //  4-2. If n is 0, loop around this cell and if that cell have not click_0, click them.
         cell.innerHTML = '';
@@ -167,6 +166,8 @@ const cellClickEventListener = event => {
             aroundCell.click();
         });
     }
+
+    checkGameFinished();
 }
 
 /**
@@ -268,7 +269,9 @@ const cellAllClickEventListener = event => {
     // 즉, 지뢰인 곳에 깃발이 없으면 틀린 것이며, 
     //     지뢰가 아닌 곳에 깃발이 있어도 틀린 것이다. 
     isCorrect = true; 
-    
+    let uncorrectCell;
+    let answerMineCell; 
+
     loopAroundCell(cell, aroundCell => {
         for(let clazz of aroundCell.classList) {
             if(clazz.startsWith('clicked')) 
@@ -278,15 +281,17 @@ const cellAllClickEventListener = event => {
 
         if(aroundCell.classList.contains('mine') && !aroundCell.classList.contains('flag')){
             isCorrect = false;
+            answerMineCell = aroundCell;
         } else if(!aroundCell.classList.contains('mine') && aroundCell.classList.contains('flag')){
             isCorrect = false;
+            uncorrectCell = aroundCell;
         }
     });
 
 
     if(!isCorrect){
         // 틀렸다면 게임을 종료시킨다. 
-        console.log('game over');
+        gameOver(uncorrectCell, answerMineCell);
         return;
     } else {
         // 정답인 경우 flag가 아닌 주변 셀을 클릭한다. 
@@ -333,6 +338,54 @@ const loopAroundCell = (targetCell, callback) => {
     } // end h_loop
 }
  
+const checkGameFinished = () => {
+    const width = widths[difficulty.value];
+    const height = heights[difficulty.value];
+    const mineCnt = mineCnts[difficulty.value];
+
+    const allNotMineCellCnt = width * height - mineCnt;
+    let clickedCellCnt = 0;
+
+    for(let i = 0; i < 9; i++){
+        clickedCellCnt += document.getElementsByClassName(`clicked_${i}`).length;
+    }
+
+    if(allNotMineCellCnt !== clickedCellCnt)
+        return;
+
+    const mineCells = document.getElementsByClassName('mine');
+
+    for(let mineCell of mineCells) {
+        if(!mineCell.classList.contains('flag')){
+            mineCell.classList.add('flag');
+            mineCell.innerHTML = 'F';
+        }
+    };
+
+    alert('Congratulation!!');
+}
+
+const gameOver = (uncorrectCell, correctCell = undefined) => {
+    const cells = document.getElementsByClassName('cell');
+
+    for(let cell of cells) {
+        cell.removeEventListener('click', cellClickEventListener);
+        cell.removeEventListener('contextmenu', cellContextMenuEventListener);
+    }
+
+    console.log(uncorrectCell)
+
+    uncorrectCell.innerHTML = 'X';
+    uncorrectCell.classList.add('uncorrect');
+
+    if(correctCell){
+        correctCell.classList.add = 'answer_mine';
+        correctCell.innerHTML = 'M';
+    }
+
+    alert('Game over!!');
+}
+
 window.onload = () => {
     /* initialize start*/
     let newGame = createNewGame(difficulty.value);
@@ -347,6 +400,12 @@ window.onload = () => {
         board.appendChild(createNewGame(difficulty.value));
     })
 
+    refreshBtn.addEventListener('click', () => {
+        while(board.firstChild) {
+            board.firstChild.remove();
+        }
+        board.appendChild(createNewGame(difficulty.value));
+    })
     /* Add event listener end */
 
 }
