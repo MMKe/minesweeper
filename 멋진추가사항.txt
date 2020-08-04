@@ -1,0 +1,2 @@
+주변 셀들을 루프하는 함수를 만들어서 콜백으로 처리하도록 해보자 
+function loopAroundCells(targetCell, callback);
