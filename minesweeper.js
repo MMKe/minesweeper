@@ -1,3 +1,5 @@
+'use strict'
+
 const widths = [0, 9, 16, 30]; // first data is dummy
 const heights = [0, 9, 16, 16]; // first data is dummy
 const mineCnts = [0, 10, 40, 99]; // first data is dummy
@@ -79,6 +81,7 @@ const createNewGameBoard = difficulty => {
 
             // add event listener
             cell.addEventListener('click', cellClickEventListener);
+            cell.addEventListener('contextmenu', cellContextMenuEventListener);
 
             // add to row
             gameBoardTableRow.appendChild(cell);
@@ -183,6 +186,46 @@ const cellClickEventListener = event => {
         } // end h-for
     }
     
+
+}
+
+/**
+ * cell's right click event listener 
+ * 1. check this cell is clicked. If this cell is already clicked, return
+ * 2. check this cell's states(cell, flag, question)
+ */
+const cellContextMenuEventListener = event => {
+    // remove original event listener
+    event.preventDefault();
+
+    let cell = event.srcElement;
+
+    // 1. check this cell is clicked. If this cell is already clicked, return
+    let isClicked = false;
+
+    for(let clazz of cell.classList){
+        if(clazz.startsWith('clicked')){
+            isClicked = true;
+        }
+    }
+
+    if(isClicked) return;
+
+    // 2. check this cell's states(cell, flag, question)
+    if(cell.classList.contains('flag')) {
+        // flag -> question
+        cell.innerHTML = '?';
+        cell.classList.add('question');
+        cell.classList.remove('flag');
+    } else if(cell.classList.contains('question')) {
+        // question -> cell
+        cell.classList.remove('question');
+        cell.innerHTML ='ㅁ';
+    } else {
+        // cell -> flag 
+        cell.innerHTML = 'F';
+        cell.classList.add('flag');
+    }
 
 }
 
