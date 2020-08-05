@@ -19,6 +19,10 @@ td.flag {
     color : red;
 }
 
+td.mousedown {
+    opacity : 0.5;
+}
+
 /* td.clicked_n start */
 td.clicked_0 {
     background-color: gray;

@@ -84,6 +84,8 @@ const createNewGameBoard = difficulty => {
             // add event listener
             cell.addEventListener('click', cellClickEventListener);
             cell.addEventListener('contextmenu', cellContextMenuEventListener);
+            cell.addEventListener('mousedown', cellMouseDownEventListener);
+            cell.addEventListener('mouseup', cellMouseUpEventListener);
 
             // add to row
             gameBoardTableRow.appendChild(cell);
@@ -139,7 +141,6 @@ const cellClickEventListener = event => {
     // 1. check this cell is mine or flag
     if(isMine) {
         // If this cell is mine, game over
-        console.log('You lose');
         gameOver(cell);
         return;
     }
@@ -313,6 +314,29 @@ const cellAllClickEventListener = event => {
 
 }
 
+const cellMouseDownEventListener = event => {
+    if(event.buttons !== 3)
+        return;
+
+    loopAroundCell(event.srcElement, aroundCell => {
+        // if aroundCell is already clicked, return(continue)
+        for(let clazz of aroundCell.classList) 
+            if(clazz.startsWith('clicked'))
+                return;
+        
+        aroundCell.classList.add('mousedown');
+    });
+}
+
+const cellMouseUpEventListener = event => {
+    const mousedownCells = document.getElementsByClassName('mousedown');
+
+    for(let mousedownCell of mousedownCells){
+        mousedownCell.classList.remove('mousedown');
+    }
+    
+}
+
 /**
  * loop around targetCell and call callback func
  * 
@@ -376,9 +400,9 @@ const gameOver = (uncorrectCell, correctCell = undefined) => {
     for(let cell of cells) {
         cell.removeEventListener('click', cellClickEventListener);
         cell.removeEventListener('contextmenu', cellContextMenuEventListener);
+        cell.removeEventListener('mousedown', cellMouseDownEventListener);
+        cell.removeEventListener('mouseup', cellMouseUpEventListener);
     }
-
-    console.log(uncorrectCell)
 
     uncorrectCell.innerHTML = 'X';
     uncorrectCell.classList.add('uncorrect');
