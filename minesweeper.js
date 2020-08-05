@@ -314,6 +314,15 @@ const cellAllClickEventListener = event => {
 
 }
 
+/**
+ * cell's mousedown event listener
+ * 
+ * @param {*} event 
+ * 
+ * 1. check event.buttons. Only all mouse button's clicked, continue
+ * 2. loop around cell. If around cell's already clicked, return(continue)
+ * 3. add class to around cell
+ */
 const cellMouseDownEventListener = event => {
     if(event.buttons !== 3)
         return;
@@ -328,13 +337,17 @@ const cellMouseDownEventListener = event => {
     });
 }
 
+/**
+ * cell's mouseup event listener
+ * 
+ * @param {*} event 
+ * 
+ * 1. loop around cell, and remove mousedown class from them
+ */
 const cellMouseUpEventListener = event => {
-    const mousedownCells = document.getElementsByClassName('mousedown');
-
-    for(let mousedownCell of mousedownCells){
-        mousedownCell.classList.remove('mousedown');
-    }
-    
+    loopAroundCell(event.srcElement, aroundCell => {
+        aroundCell.classList.remove('mousedown');
+    });
 }
 
 /**
