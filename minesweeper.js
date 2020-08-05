@@ -112,8 +112,9 @@ const createNewGameBoard = difficulty => {
 /**
  * cell's click event listener
  * 
- * 1. check this cell is mine.
+ * 1. check this cell is mine or flag.
  *    If this cell is mine, game over
+ *    If this cell is flag, return
  * 2. Count mine(n) that are around this cell
  * 3. Add clikced_n class to this cell's classList
  * 4-1. If n is larger than 0, changed this innerHTML
@@ -122,6 +123,7 @@ const createNewGameBoard = difficulty => {
 const cellClickEventListener = event => {
     const cell = event.srcElement;
     const isMine = cell.classList.contains('mine');
+    const isFlag = cell.classList.contains('flag');
 
     // 0. If left and right button are clicked, call cellAllClickEventListerner
     if(event.buttons === 2){
@@ -129,13 +131,19 @@ const cellClickEventListener = event => {
         return;
     }
 
-    // 1. check this cell is mine
+    // 1. check this cell is mine or flag
     if(isMine) {
-        // game end
+        // If this cell is mine, game over
         console.log('You lose');
         gameOver(cell);
         return;
     }
+
+    if(isFlag){
+        // If this cell is flag, return
+        return;
+    }
+    
 
     // 2. Count mine that are around this cell
     const width = widths[difficulty.value];
@@ -176,7 +184,7 @@ const cellClickEventListener = event => {
  * cell's right click event listener 
  * 
  * 1. check this cell is clicked. If this cell is already clicked, return
- * 2. check this cell's states(cell, flag, question)
+ * 2. check this cell's states(cell, flag)
  */
 const cellContextMenuEventListener = event => {
     // remove original event listener
@@ -195,16 +203,11 @@ const cellContextMenuEventListener = event => {
 
     if(isClicked) return;
 
-    // 2. check this cell's states(cell, flag, question)
+    // 2. check this cell's states(cell, flag)
     if(cell.classList.contains('flag')) {
-        // flag -> question
-        cell.innerHTML = '?';
-        cell.classList.add('question');
+        // flag -> cell
+        cell.innerHTML = '';
         cell.classList.remove('flag');
-    } else if(cell.classList.contains('question')) {
-        // question -> cell
-        cell.classList.remove('question');
-        cell.innerHTML ='  ';
     } else {
         // cell -> flag 
         cell.innerHTML = 'F';
