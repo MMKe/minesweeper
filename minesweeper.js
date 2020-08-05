@@ -113,8 +113,8 @@ const createNewGameBoard = difficulty => {
  * cell's click event listener
  * 
  * 1. check this cell is mine or flag.
- *    If this cell is mine, game over
  *    If this cell is flag, return
+ *    If this cell is mine, game over
  * 2. Count mine(n) that are around this cell
  * 3. Add clikced_n class to this cell's classList
  * 4-1. If n is larger than 0, changed this innerHTML
@@ -130,6 +130,11 @@ const cellClickEventListener = event => {
         cellAllClickEventListener(event);
         return;
     }
+    
+    if(isFlag){
+        // If this cell is flag, return
+        return;
+    }
 
     // 1. check this cell is mine or flag
     if(isMine) {
@@ -139,11 +144,6 @@ const cellClickEventListener = event => {
         return;
     }
 
-    if(isFlag){
-        // If this cell is flag, return
-        return;
-    }
-    
 
     // 2. Count mine that are around this cell
     const width = widths[difficulty.value];
