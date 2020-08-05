@@ -28,6 +28,8 @@ const createNewGame = difficulty => {
     // 3-3. create refresh button, and append to header
     const refreshBtn = document.createElement('button');
     refreshBtn.setAttribute('id', 'refreshBtn');
+    refreshBtn.innerHTML = '재시작';
+    refreshBtn.addEventListener('click', refreshGame);
     boardHeader.appendChild(refreshBtn);
 
     // append dummy text node to test
@@ -386,6 +388,32 @@ const gameOver = (uncorrectCell, correctCell = undefined) => {
     alert('Game over!!');
 }
 
+/**
+ * Refresh game.
+ * Used to refreshBtn's click event listener or select#difficulty's change event listener
+ * 
+ * 1. confirm user input. If user input is false, early return
+ * 2. create new game board table 
+ * 3. remove game baord table from main window
+ * 4. append new game board table to main window
+ */
+const refreshGame = () => {
+    let userInput = confirm('New game?');
+
+    // 1. confirm user input. If user input is false, early return
+    if(userInput === false)
+        return;
+
+    // 2. create new game board table
+    const newGameBoardTable = createNewGameBoard(difficulty.value);
+
+    // 3. remove game board table    
+    mainWindow.removeChild(gameBoardTable);
+
+    // 4. append new game board table to main window
+    mainWindow.appendChild(newGameBoardTable);
+}
+
 window.onload = () => {
     /* initialize start*/
     let newGame = createNewGame(difficulty.value);
@@ -393,19 +421,6 @@ window.onload = () => {
     /* initialize end*/
 
     /* Add event listener start */
-    difficulty.addEventListener('change', () => {
-        while(board.firstChild) {
-            board.firstChild.remove();
-        }
-        board.appendChild(createNewGame(difficulty.value));
-    })
-
-    refreshBtn.addEventListener('click', () => {
-        while(board.firstChild) {
-            board.firstChild.remove();
-        }
-        board.appendChild(createNewGame(difficulty.value));
-    })
+    difficulty.addEventListener('change', refreshGame);
     /* Add event listener end */
-
 }
