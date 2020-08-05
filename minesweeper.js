@@ -3,6 +3,7 @@
 const widths = [0, 9, 16, 30]; // first data is dummy
 const heights = [0, 9, 16, 16]; // first data is dummy
 const mineCnts = [0, 10, 40, 99]; // first data is dummy
+let isFinished = false;
 
 const createNewGame = difficulty => {
     // 1. create main window
@@ -48,6 +49,7 @@ const createNewGameBoard = difficulty => {
     const width = widths[difficulty];
     const height = heights[difficulty];
     const mineCnt = mineCnts[difficulty];
+    isFinished = false;
 
     // 2. create game board
     const gameBoardTable = document.createElement('table');
@@ -145,14 +147,7 @@ const cellClickEventListener = event => {
         return;
     }
 
-
     // 2. Count mine that are around this cell
-    const width = widths[difficulty.value];
-    const height = heights[difficulty.value];
-    
-    const cellX = Number(cell.width);
-    const cellY = Number(cell.height);
-
     let aroundMineCnt = 0;
 
     loopAroundCell(cell, aroundCell => {
@@ -381,6 +376,9 @@ const loopAroundCell = (targetCell, callback) => {
 }
  
 const checkGameFinished = () => {
+    if(isFinished)
+        return;
+
     const width = widths[difficulty.value];
     const height = heights[difficulty.value];
     const mineCnt = mineCnts[difficulty.value];
@@ -403,11 +401,15 @@ const checkGameFinished = () => {
             mineCell.innerHTML = 'F';
         }
     };
-
+    
+    isFinished = true;
     alert('Congratulation!!');
 }
 
 const gameOver = (uncorrectCell, correctCell = undefined) => {
+    if(isFinished)
+       return; 
+    
     const cells = document.getElementsByClassName('cell');
 
     for(let cell of cells) {
@@ -425,6 +427,7 @@ const gameOver = (uncorrectCell, correctCell = undefined) => {
         correctCell.innerHTML = 'M';
     }
 
+    isFinished = true;
     alert('Game over!!');
 }
 
@@ -438,11 +441,13 @@ const gameOver = (uncorrectCell, correctCell = undefined) => {
  * 4. append new game board table to main window
  */
 const refreshGame = () => {
-    let userInput = confirm('New game?');
-
-    // 1. confirm user input. If user input is false, early return
-    if(userInput === false)
-        return;
+    if(!isFinished) {
+        let userInput = confirm('New game?');
+    
+        // 1. confirm user input. If user input is false, early return
+        if(userInput === false)
+            return;
+    }
 
     // 2. create new game board table
     const newGameBoardTable = createNewGameBoard(difficulty.value);
