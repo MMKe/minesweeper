@@ -455,6 +455,8 @@ const gameOver = (uncorrectCell, correctCell = undefined) => {
         correctCell.innerHTML = 'M';
     }
 
+    turnOutAllMines();
+
     isFinished = true;
     alert('Game over!!');
 }
@@ -485,6 +487,17 @@ const refreshGame = () => {
 
     // 4. append new game board table to main window
     mainWindow.appendChild(newGameBoardTable);
+}
+
+const turnOutAllMines = () => {
+    const mines = document.getElementsByClassName('mine');
+
+    for(let mine of mines){
+        if(mine.classList.contains('flag'))
+            continue;
+        else 
+            mine.innerHTML = 'M';
+    }
 }
 
 window.onload = () => {

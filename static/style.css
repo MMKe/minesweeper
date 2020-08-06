@@ -23,6 +23,10 @@ td.mousedown {
     opacity : 0.3;
 }
 
+td.uncorrect {
+    background-color: red;
+}
+
 /* td.clicked_n start */
 td.clicked_0 {
     background-color: gray;
