@@ -434,6 +434,15 @@ const checkGameFinished = () => {
     alert('Congratulation!!');
 }
 
+/**
+ * 게임오버 되었을 때 호출된다. 
+ * 모든 이벤트 리스너를 제거하고, 답을 밝힌다. 
+ * 
+ * 1. 모든 이벤트리스너를 제거한다. 
+ * 2. 지뢰를 클릭했을 경우, (correctCell === undefined)
+ * 2-1. 지뢰칸의 배경을 붉게한다. 
+ * 3. 잘못된 플래그가 세워져 있는 경우, 
+ */
 const gameOver = (uncorrectCell, correctCell = undefined) => {
     if(isFinished)
        return; 
@@ -447,12 +456,16 @@ const gameOver = (uncorrectCell, correctCell = undefined) => {
         cell.removeEventListener('mouseup', cellMouseUpEventListener);
     }
 
-    uncorrectCell.innerHTML = 'X';
-    uncorrectCell.classList.add('uncorrect');
-
-    if(correctCell){
-        correctCell.classList.add = 'answer_mine';
-        correctCell.innerHTML = 'M';
+    if(correctCell === undefined){
+        uncorrectCell.classList.add('uncorrect');
+    } else {
+        // correctCell.classList.add = 'answer_mine';
+        uncorrectCell.innerHTML = ''; // 잘못 세워진 flag를 제거
+        const xMarkImage = document.createElement('img');
+        xMarkImage.src = './static/img/x_mark.png';
+        xMarkImage.width = '34';
+        xMarkImage.height = '34';
+        uncorrectCell.appendChild(xMarkImage);
     }
 
     turnOutAllMines();
@@ -495,8 +508,13 @@ const turnOutAllMines = () => {
     for(let mine of mines){
         if(mine.classList.contains('flag'))
             continue;
-        else 
-            mine.innerHTML = 'M';
+        console.log(mine);
+        const mineImage = document.createElement('img');
+        mineImage.src = './static/img/mine.png';
+        mineImage.width = '34';
+        mineImage.height = '34';
+        
+        mine.appendChild(mineImage);
     }
 }
 
