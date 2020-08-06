@@ -136,7 +136,6 @@ const cellClickEventListener = event => {
     const isFlag = cell.classList.contains('flag');
 
     // 0. If left and right button are clicked, call cellAllClickEventListerner
-    console.log(`${cell.id} clicked - evnet.buttons ${event.buttons}`);
     if(event.buttons === 2){
         cellAllClickEventListener(event);
         return;
@@ -203,7 +202,6 @@ const cellClickEventListener = event => {
 
     checkGameFinished();
 }
-
 /**
  * cell's right click event listener 
  * 
@@ -213,12 +211,12 @@ const cellClickEventListener = event => {
 const cellContextMenuEventListener = event => {
     // remove original event listener
     event.preventDefault();
-
+    
     let cell = event.srcElement;
-
+    
     // 1. check this cell is clicked. If this cell is already clicked, return
     let isClicked = false;
-
+    
     for(let clazz of cell.classList){
         if(clazz.startsWith('clicked')){
             isClicked = true;
@@ -234,10 +232,21 @@ const cellContextMenuEventListener = event => {
         cell.classList.remove('flag');
     } else {
         // cell -> flag 
-        cell.innerHTML = 'F';
+        // cell.innerHTML = 'F';
         cell.classList.add('flag');
-    }
 
+        const flagImage = document.createElement('img');
+        flagImage.src = './static/img/flag.jpg';
+        flagImage.width = '33';
+        flagImage.height = '33';
+        flagImage.addEventListener('contextmenu', event => {
+            event.preventDefault();
+            const cell = event.srcElement.parentElement;
+            cell.classList.remove('flag');
+            cell.removeChild(event.srcElement);
+        });
+        cell.appendChild(flagImage);
+    }
 }
 
 /**
@@ -508,7 +517,6 @@ const turnOutAllMines = () => {
     for(let mine of mines){
         if(mine.classList.contains('flag'))
             continue;
-        console.log(mine);
         const mineImage = document.createElement('img');
         mineImage.src = './static/img/mine.png';
         mineImage.width = '34';
