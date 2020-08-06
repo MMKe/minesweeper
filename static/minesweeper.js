@@ -3,7 +3,9 @@
 const widths = [0, 9, 16, 30]; // first data is dummy
 const heights = [0, 9, 16, 16]; // first data is dummy
 const mineCnts = [0, 10, 40, 99]; // first data is dummy
-let isFinished = false;
+
+let isFinished = false; // Save game state
+let isFirstClick = true; // check first click to lose game at first click
 
 const createNewGame = difficulty => {
     // 1. create main window
@@ -49,7 +51,8 @@ const createNewGameBoard = difficulty => {
     const width = widths[difficulty];
     const height = heights[difficulty];
     const mineCnt = mineCnts[difficulty];
-    isFinished = false;
+    isFinished = false; // initialize game state
+    isFirstClick = true; // initialize first check
 
     // 2. create game board
     const gameBoardTable = document.createElement('table');
@@ -116,17 +119,20 @@ const createNewGameBoard = difficulty => {
 /**
  * cell's click event listener
  * 
- * 1. check this cell is mine or flag.
+ * 0. If left and right button are clicked, call cellAllClickEventListerner
+ * 1. check this click is first and cell is mine
+ *    if first click and cell is mine, find not mine cell, and change this cell with that
+ * 2. check this cell is mine or flag.
  *    If this cell is flag, return
  *    If this cell is mine, game over
- * 2. Count mine(n) that are around this cell
- * 3. Add clikced_n class to this cell's classList
- * 4-1. If n is larger than 0, changed this innerHTML
- * 4-2. If n is 0, loop around this cell and if that cell have not click_0, click them.
+ * 3. Count mine(n) that are around this cell
+ * 4. Add clikced_n class to this cell's classList
+ * 5-1. If n is larger than 0, changed this innerHTML
+ * 5-2. If n is 0, loop around this cell and if that cell have not click_0, click them.
  */
 const cellClickEventListener = event => {
     const cell = event.srcElement;
-    const isMine = cell.classList.contains('mine');
+    let isMine = cell.classList.contains('mine');
     const isFlag = cell.classList.contains('flag');
 
     // 0. If left and right button are clicked, call cellAllClickEventListerner
@@ -135,19 +141,40 @@ const cellClickEventListener = event => {
         return;
     }
     
+    // 1. check this click is first and cell is mine
+    if(isFirstClick && isMine) {
+        let notMineCell; 
+
+        loopAroundCell(cell, aroundCell => {
+            if(!aroundCell.classList.contains('mine'))
+                notMineCell = aroundCell;
+        });
+        
+        if(notMineCell){
+            // if first click and cell is mine, find not mine cell, and change this cell with that
+            cell.classList.remove('mine');
+            notMineCell.classList.add('mine');
+            
+            // now this cell is not mine
+            isMine = false;
+        }
+    }
+
+    isFirstClick = false;
+
+    // 2. check this cell is mine or flag
     if(isFlag){
         // If this cell is flag, return
         return;
     }
 
-    // 1. check this cell is mine or flag
     if(isMine) {
         // If this cell is mine, game over
         gameOver(cell);
-        return;
+        return; 
     }
 
-    // 2. Count mine that are around this cell
+    // 3. Count mine that are around this cell
     let aroundMineCnt = 0;
 
     loopAroundCell(cell, aroundCell => {
@@ -155,14 +182,14 @@ const cellClickEventListener = event => {
             aroundMineCnt++;
     });
 
-    // 3. Add clikced_n class to this cell's classList
+    // 4. Add clikced_n class to this cell's classList
     cell.classList.add(`clicked_${aroundMineCnt}`);
 
     if(aroundMineCnt != 0) {
-        // 4-1. If n is larger than 0, changed this innerHTML
+        // 5-1. If n is larger than 0, changed this innerHTML
         cell.innerHTML = aroundMineCnt;
     } else {
-        //  4-2. If n is 0, loop around this cell and if that cell have not click_0, click them.
+        // 5-2. If n is 0, loop around this cell and if that cell have not click_0, click them.
         cell.innerHTML = '';
         
         loopAroundCell(cell, aroundCell => {
@@ -175,7 +202,6 @@ const cellClickEventListener = event => {
 
     checkGameFinished();
 }
-
 /**
  * cell's right click event listener 
  * 
@@ -185,12 +211,12 @@ const cellClickEventListener = event => {
 const cellContextMenuEventListener = event => {
     // remove original event listener
     event.preventDefault();
-
+    
     let cell = event.srcElement;
-
+    
     // 1. check this cell is clicked. If this cell is already clicked, return
     let isClicked = false;
-
+    
     for(let clazz of cell.classList){
         if(clazz.startsWith('clicked')){
             isClicked = true;
@@ -206,10 +232,21 @@ const cellContextMenuEventListener = event => {
         cell.classList.remove('flag');
     } else {
         // cell -> flag 
-        cell.innerHTML = 'F';
+        // cell.innerHTML = 'F';
         cell.classList.add('flag');
-    }
 
+        const flagImage = document.createElement('img');
+        flagImage.src = './static/img/flag.jpg';
+        flagImage.width = '33';
+        flagImage.height = '33';
+        flagImage.addEventListener('contextmenu', event => {
+            event.preventDefault();
+            const cell = event.srcElement.parentElement;
+            cell.classList.remove('flag');
+            cell.removeChild(event.srcElement);
+        });
+        cell.appendChild(flagImage);
+    }
 }
 
 /**
@@ -406,6 +443,15 @@ const checkGameFinished = () => {
     alert('Congratulation!!');
 }
 
+/**
+ * 게임오버 되었을 때 호출된다. 
+ * 모든 이벤트 리스너를 제거하고, 답을 밝힌다. 
+ * 
+ * 1. 모든 이벤트리스너를 제거한다. 
+ * 2. 지뢰를 클릭했을 경우, (correctCell === undefined)
+ * 2-1. 지뢰칸의 배경을 붉게한다. 
+ * 3. 잘못된 플래그가 세워져 있는 경우, 
+ */
 const gameOver = (uncorrectCell, correctCell = undefined) => {
     if(isFinished)
        return; 
@@ -419,13 +465,19 @@ const gameOver = (uncorrectCell, correctCell = undefined) => {
         cell.removeEventListener('mouseup', cellMouseUpEventListener);
     }
 
-    uncorrectCell.innerHTML = 'X';
-    uncorrectCell.classList.add('uncorrect');
-
-    if(correctCell){
-        correctCell.classList.add = 'answer_mine';
-        correctCell.innerHTML = 'M';
+    if(correctCell === undefined){
+        uncorrectCell.classList.add('uncorrect');
+    } else {
+        // correctCell.classList.add = 'answer_mine';
+        uncorrectCell.innerHTML = ''; // 잘못 세워진 flag를 제거
+        const xMarkImage = document.createElement('img');
+        xMarkImage.src = './static/img/x_mark.png';
+        xMarkImage.width = '34';
+        xMarkImage.height = '34';
+        uncorrectCell.appendChild(xMarkImage);
     }
+
+    turnOutAllMines();
 
     isFinished = true;
     alert('Game over!!');
@@ -457,6 +509,21 @@ const refreshGame = () => {
 
     // 4. append new game board table to main window
     mainWindow.appendChild(newGameBoardTable);
+}
+
+const turnOutAllMines = () => {
+    const mines = document.getElementsByClassName('mine');
+
+    for(let mine of mines){
+        if(mine.classList.contains('flag'))
+            continue;
+        const mineImage = document.createElement('img');
+        mineImage.src = './static/img/mine.png';
+        mineImage.width = '34';
+        mineImage.height = '34';
+        
+        mine.appendChild(mineImage);
+    }
 }
 
 window.onload = () => {
