@@ -3,7 +3,9 @@
 const widths = [0, 9, 16, 30]; // first data is dummy
 const heights = [0, 9, 16, 16]; // first data is dummy
 const mineCnts = [0, 10, 40, 99]; // first data is dummy
-let isFinished = false;
+
+let isFinished = false; // Save game state
+let isFirstClick = true; // check first click to lose game at first click
 
 const createNewGame = difficulty => {
     // 1. create main window
@@ -49,7 +51,8 @@ const createNewGameBoard = difficulty => {
     const width = widths[difficulty];
     const height = heights[difficulty];
     const mineCnt = mineCnts[difficulty];
-    isFinished = false;
+    isFinished = false; // initialize game state
+    isFirstClick = true; // initialize first check
 
     // 2. create game board
     const gameBoardTable = document.createElement('table');
@@ -116,38 +119,63 @@ const createNewGameBoard = difficulty => {
 /**
  * cell's click event listener
  * 
- * 1. check this cell is mine or flag.
+ * 0. If left and right button are clicked, call cellAllClickEventListerner
+ * 1. check this click is first and cell is mine
+ *    if first click and cell is mine, find not mine cell, and change this cell with that
+ * 2. check this cell is mine or flag.
  *    If this cell is flag, return
  *    If this cell is mine, game over
- * 2. Count mine(n) that are around this cell
- * 3. Add clikced_n class to this cell's classList
- * 4-1. If n is larger than 0, changed this innerHTML
- * 4-2. If n is 0, loop around this cell and if that cell have not click_0, click them.
+ * 3. Count mine(n) that are around this cell
+ * 4. Add clikced_n class to this cell's classList
+ * 5-1. If n is larger than 0, changed this innerHTML
+ * 5-2. If n is 0, loop around this cell and if that cell have not click_0, click them.
  */
 const cellClickEventListener = event => {
     const cell = event.srcElement;
-    const isMine = cell.classList.contains('mine');
+    let isMine = cell.classList.contains('mine');
     const isFlag = cell.classList.contains('flag');
 
     // 0. If left and right button are clicked, call cellAllClickEventListerner
+    console.log(`${cell.id} clicked - evnet.buttons ${event.buttons}`);
     if(event.buttons === 2){
         cellAllClickEventListener(event);
         return;
     }
     
+    // 1. check this click is first and cell is mine
+    if(isFirstClick && isMine) {
+        let notMineCell; 
+
+        loopAroundCell(cell, aroundCell => {
+            if(!aroundCell.classList.contains('mine'))
+                notMineCell = aroundCell;
+        });
+        
+        if(notMineCell){
+            // if first click and cell is mine, find not mine cell, and change this cell with that
+            cell.classList.remove('mine');
+            notMineCell.classList.add('mine');
+            
+            // now this cell is not mine
+            isMine = false;
+        }
+    }
+
+    isFirstClick = false;
+
+    // 2. check this cell is mine or flag
     if(isFlag){
         // If this cell is flag, return
         return;
     }
 
-    // 1. check this cell is mine or flag
     if(isMine) {
         // If this cell is mine, game over
         gameOver(cell);
-        return;
+        return; 
     }
 
-    // 2. Count mine that are around this cell
+    // 3. Count mine that are around this cell
     let aroundMineCnt = 0;
 
     loopAroundCell(cell, aroundCell => {
@@ -155,14 +183,14 @@ const cellClickEventListener = event => {
             aroundMineCnt++;
     });
 
-    // 3. Add clikced_n class to this cell's classList
+    // 4. Add clikced_n class to this cell's classList
     cell.classList.add(`clicked_${aroundMineCnt}`);
 
     if(aroundMineCnt != 0) {
-        // 4-1. If n is larger than 0, changed this innerHTML
+        // 5-1. If n is larger than 0, changed this innerHTML
         cell.innerHTML = aroundMineCnt;
     } else {
-        //  4-2. If n is 0, loop around this cell and if that cell have not click_0, click them.
+        // 5-2. If n is 0, loop around this cell and if that cell have not click_0, click them.
         cell.innerHTML = '';
         
         loopAroundCell(cell, aroundCell => {
